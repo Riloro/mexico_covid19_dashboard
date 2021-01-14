@@ -8,10 +8,36 @@ import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime
 
-#image_directory = os.getcwd() + "\images"
+
 logo_url = "https://firebasestorage.googleapis.com/v0/b/imhere-e8e31.appspot.com/o/images%2Fvirus.png?alt=media&token=181e8b57-30b3-424f-a1ef-3890143e709c"
 
-#Reading national Data ....
+
+#Readin JHU data ................................................................................................................................................
+#Casos confirmados reportados por JHU ....
+jhu_confirmed_time_serie = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", encoding = "utf-8")
+jhu_confirmed_mexico = jhu_confirmed_time_serie[jhu_confirmed_time_serie["Country/Region"] == "Mexico"]
+#Muertes reportadas por JHU ...
+jhu_deaths_time_serie = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv",encoding="utf-8")
+jhu_deaths_mexico = jhu_deaths_time_serie[jhu_deaths_time_serie["Country/Region"] == "Mexico"]
+#Recuperados reportados por JHU ...
+jhu_recovered_time_serie = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv",encoding="utf-8")
+jhu_recovered_mexico = jhu_recovered_time_serie[jhu_recovered_time_serie["Country/Region"] == "Mexico"]
+
+raw_confirmed_data = jhu_confirmed_mexico.reset_index(drop=True).transpose().reset_index()
+raw_deats_data = jhu_deaths_mexico.reset_index(drop = True).transpose().reset_index()
+
+#Filtrando el numero de casos y fechas de cada dataFrame ...
+jhu_conf_mex_df = raw_confirmed_data["index"].iloc[4:].to_frame("fecha_confirmados").reset_index(drop = True)
+jhu_conf_mex_df["confirmados"] = raw_confirmed_data[0].iloc[4:].reset_index(drop = True)
+jhu_conf_mex_df["fecha_confirmados_dateTime"] = pd.to_datetime(jhu_conf_mex_df["fecha_confirmados"], format = "%m/%d/%y")
+
+jhu_deaths_mex_df = raw_deats_data["index"].iloc[4:].to_frame("fecha_muerte").reset_index(drop = True)
+jhu_deaths_mex_df["muertes"] = raw_deats_data[0].iloc[4:].reset_index(drop = True)
+jhu_deaths_mex_df["fecha_muerte_dateTime"] = pd.to_datetime(jhu_deaths_mex_df["fecha_muerte"], format = "%m/%d/%y")
+
+
+
+#Reading national Data ...........................................................................................................................................
 data = pd.read_csv("http://datosabiertos.salud.gob.mx/gobmx/salud/datos_abiertos/datos_abiertos_covid19.zip", compression = "zip", encoding = "latin1")
 print("ARCHIVOS DE SALUD CARGADOS :)")
 # States diccionary ...
@@ -22,8 +48,9 @@ poblaciones = pd.read_csv("http://www.conapo.gob.mx/work/models/CONAPO/Datos_Abi
 poblacion_2020 = poblaciones[poblaciones["AÑO"] == 2020]
 print("DATOS DE CONAPO CARGADOS :)")
 #Last file update ...
-last_update = data["FECHA_ACTUALIZACION"].iloc[0]
-date_last_update = datetime.strptime(last_update, '%Y-%m-%d')
+date_last_update = jhu_conf_mex_df["fecha_confirmados_dateTime"].iloc[-1]
+# last_update = data["FECHA_ACTUALIZACION"].iloc[0]
+# date_last_update = datetime.strptime(last_update, '%Y-%m-%d')
 
 if date_last_update.day < 10:
     day = "0" + str(date_last_update.day)
@@ -71,11 +98,11 @@ grupos_pob = poblacion_2020.groupby(["CVE_GEO","ENTIDAD"])
 poblacion_tot_estado = grupos_pob["POBLACION"].sum().to_frame("POBLACION").reset_index()   # Sum operation in the POBLACION column of each group
 
 datos_por_estado = pd.merge(confirmados_por_entidad, poblacion_tot_estado, how = "left", left_on = "CLAVE_ENTIDAD", right_on = "CVE_GEO" )
-# Rate of confirmed case by 100,000 people 
+# Rate of confirmed case by 100,000 people
 datos_por_estado["TASA DE CASOS POR 100K"] = 100000 * datos_por_estado["Casos confirmados"]/datos_por_estado["POBLACION"]
 datos_por_estado.sort_values("TASA DE CASOS POR 100K", ascending = False, inplace = True)
 datos_por_estado.reset_index(drop = True, inplace = True)
-# Bar plot of the rate of confirmed cases per 100k persons 
+# Bar plot of the rate of confirmed cases per 100k persons
 fig_bar_cases_rate = px.bar(x = datos_por_estado["ENTIDAD"], y = datos_por_estado["TASA DE CASOS POR 100K"],
                             labels = dict(y = "Casos confirmados / 100k personas" , x = "") ,title = "Tasa de casos confirmados por cada 100,000 personas")
 
@@ -116,23 +143,26 @@ def acum_plot(x_conf_data, y_conf_data, x_def_data, y_def_data, region ):
     return fig_acum
 
 clave_estado = 16
-confirmados_mich = confirmados_por_estado_fecha_clave[confirmados_por_estado_fecha_clave["ENTIDAD_RES"] == clave_estado]
-print("Total de casos confirmados = ",confirmados_mich["confirmados"].sum())
-confirmados_mich.reset_index(drop = True, inplace = True)
-confirmados_mich["confirmados_acumulados"] = commulative_cases(confirmados_mich["confirmados"]) # Accumulated confirmed cases in Mich.
-defunciones_mich = defunciones_por_estado_fecha_clave[defunciones_por_estado_fecha_clave["ENTIDAD_RES"] == clave_estado ]
-print("Total de defunciones acumuladas = ", defunciones_mich["defunciones"].sum())
-defunciones_mich.reset_index(drop = True, inplace = True)     
-defunciones_mich["defunciones_acumuladas"] = commulative_cases(defunciones_mich["defunciones"])
+confirmados_estado = confirmados_por_estado_fecha_clave[confirmados_por_estado_fecha_clave["ENTIDAD_RES"] == clave_estado]
+print("Total de casos confirmados = ",confirmados_estado["confirmados"].sum())
+confirmados_estado.reset_index(drop = True, inplace = True)
+confirmados_estado["confirmados_acumulados"] = commulative_cases(confirmados_estado["confirmados"]) # Accumulated confirmed cases in Mich.
+defunciones_estado = defunciones_por_estado_fecha_clave[defunciones_por_estado_fecha_clave["ENTIDAD_RES"] == clave_estado ]
+print("Total de defunciones acumuladas = ", defunciones_estado["defunciones"].sum())
+defunciones_estado.reset_index(drop = True, inplace = True)
+defunciones_estado["defunciones_acumuladas"] = commulative_cases(defunciones_estado["defunciones"])
 
 
 #Computing the average with the actual day plus the 6 previous days
-def average_of_seven_days(serie):
+def average_of_seven_days(serie , threshold = 25000):
     data_vect = np.array(serie)
     average = np.zeros(data_vect.size)
     counter = 0
     init = 0
-
+    # ....
+    index = np.nonzero(data_vect > threshold)
+    data_vect[index] = 0
+    #Computing the average
     for i in range(data_vect.size):
         if i >= 6:
             average[counter] = np.mean(data_vect[init:i+1])
@@ -145,54 +175,93 @@ def average_of_seven_days(serie):
     return  pd.Series(np.round(average))   #Return a pandas Serie with rounded values
 
 # Bar plots for confirmed and death cases ...
-def show_confirmed_cases(cases, region):
+def show_confirmed_cases(x_vect,y_vect, region, anomalia):
+
+    if anomalia == True:
+        h = 600
+        w = 1000
+    else:
+        h = 450
+        w = 900
+
     fig_bar1 = go.Figure()
-    fig_bar1.add_trace(go.Bar(x =cases["fecha_ingreso"], y = cases["confirmados"],
+    fig_bar1.add_trace(go.Bar(x = x_vect, y = y_vect,
                                 marker = dict(color = "#ff1744", opacity = 0.6 ), name = "Nuevos casos"))
     #Average of seven days curve ...
-    fig_bar1.add_trace(go.Scatter(x = cases["fecha_ingreso"], y = average_of_seven_days(cases["confirmados"]),
+    fig_bar1.add_trace(go.Scatter(x = x_vect, y =  average_of_seven_days(y_vect),
                                         mode = "lines", line = dict(color = "#b71c1c", width = 2.5), name = "Promedio de 7 días"))
     #custom layout
-    fig_bar1.update_xaxes(title = "",spikethickness= .4)
+    fig_bar1.update_xaxes(title = "Fecha de registro",spikethickness= .4)
     fig_bar1.update_yaxes(title = "Nuevos casos confirmados")
-    fig_bar1.update_layout(width = 900, hovermode = "x unified", title = "Nuevos casos de COVID-19 reportados diariamente en " + region)
+    fig_bar1.update_layout(width = w, height = h, hovermode = "x unified", title = "Nuevos casos de COVID-19 reportados diariamente en " + region)
     #Showing figure ...
     return fig_bar1
 
-def show_deaths(deaths,region):
+def show_deaths(x_vect,y_vect,region, anomalia):
+
+    if anomalia == True:
+        h = 600
+        w = 1000
+    else:
+        h = 450
+        w = 900
     # Death cases ...
     fig_bar2 = go.Figure()
-    fig_bar2.add_trace(go.Bar(x = deaths["fecha_defuncion"], y = deaths["defunciones"],
+    fig_bar2.add_trace(go.Bar(x = x_vect, y = y_vect,
                                 marker = dict(color = "#546e7a", opacity = 0.75), name = "Nuevas defunciones"))
     #Average of seven days curve ...
-    fig_bar2.add_trace(go.Scatter(x = deaths["fecha_defuncion"], y = average_of_seven_days(deaths["defunciones"]),
+    fig_bar2.add_trace(go.Scatter(x = x_vect, y =average_of_seven_days(y_vect, threshold = 2500),
                                         mode = "lines", line = dict(color = "black", width = 2.5), name = "Promedio de 7 días"))
     #custom layout
-    fig_bar2.update_xaxes(title = "",spikethickness= .4)
+    fig_bar2.update_xaxes(title = "Fecha de registro",spikethickness= .4)
     fig_bar2.update_yaxes(title = "Nuevas defunciones confirmadas")
-    fig_bar2.update_layout(width = 900, hovermode = "x unified", title = "Nuevas defunciones de COVID-19 reportadas diariamente en " + region)
+    fig_bar2.update_layout(width = w, height = h, hovermode = "x unified", title = "Nuevas defunciones de COVID-19 reportadas diariamente en " + region)
     #Showing figure ...
     return fig_bar2
 
+# difference JHU data in order to get daily cases ....
+def diff(data):
+    v_1 = np.array(data)
+    v_2 = np.diff(v_1)
+    res = np.insert(v_2,0,v_1[0])
+
+    return pd.Series(res)
 
 
 # Commulative confirmed cases ....
-confirmados_por_fecha["casos_acumulados"] = commulative_cases(confirmados_por_fecha["confirmados"])
+#confirmados_por_fecha["casos_acumulados"] = commulative_cases(confirmados_por_fecha["confirmados"])
 # Commulative Deaths  ....
-defunciones_por_fecha["defunciones_acumuladas"] = commulative_cases(defunciones_por_fecha["defunciones"])
+#defunciones_por_fecha["defunciones_acumuladas"] = commulative_cases(defunciones_por_fecha["defunciones"])
 #National deaths and cases figures ...
-national_conf_cases_fig = show_confirmed_cases(confirmados_por_fecha, "México")
-national_deaths_fig = show_deaths(defunciones_por_fecha, "México")
+#national_conf_cases_fig = show_confirmed_cases(confirmados_por_fecha, "México")
+#national_deaths_fig = show_deaths(defunciones_por_fecha, "México")
 #More figures ...
-acum_fig = acum_plot(confirmados_por_fecha["fecha_ingreso"],confirmados_por_fecha["casos_acumulados"],
-            defunciones_por_fecha["fecha_defuncion"], defunciones_por_fecha["defunciones_acumuladas"], region = "México" )
-#State commulative cases figure
-acum_edo = acum_plot(confirmados_mich["fecha_ingreso"],confirmados_mich["confirmados_acumulados"],
-            defunciones_mich["fecha_defuncion"], defunciones_mich["defunciones_acumuladas"], region = confirmados_mich["ENTIDAD"].iloc[0] )
-print("Total de defunciones acumuladas = ", defunciones_mich["defunciones"].sum())
-print("Total de casos confirmados = ",confirmados_mich["confirmados"].sum())
-conf_cases_edo = show_confirmed_cases(confirmados_mich, region = confirmados_mich["ENTIDAD"].iloc[0])
-deaths_edo = show_deaths(defunciones_mich, region = confirmados_mich["ENTIDAD"].iloc[0])
+# acum_fig = acum_plot(confirmados_por_fecha["fecha_ingreso"],confirmados_por_fecha["casos_acumulados"],
+#             defunciones_por_fecha["fecha_defuncion"], defunciones_por_fecha["defunciones_acumuladas"], region = "México" )
+
+#State commulative cases figure....
+acum_edo = acum_plot(confirmados_estado["fecha_ingreso"],confirmados_estado["confirmados_acumulados"],
+            defunciones_estado["fecha_defuncion"], defunciones_estado["defunciones_acumuladas"], region = confirmados_estado["ENTIDAD"].iloc[0] )
+print("Total de defunciones acumuladas = ", defunciones_estado["defunciones"].sum())
+print("Total de casos confirmados = ",confirmados_estado["confirmados"].sum())
+conf_cases_edo = show_confirmed_cases(confirmados_estado["fecha_ingreso"],confirmados_estado["confirmados"], region = confirmados_estado["ENTIDAD"].iloc[0], anomalia = False)
+deaths_edo = show_deaths(defunciones_estado["fecha_defuncion"],defunciones_estado["defunciones"], region = confirmados_estado["ENTIDAD"].iloc[0], anomalia = False)
+
+#JHU data figures .....................................................................................................................
+#Graficando los casos confirmados de muertes y confirmados ....
+jhu_mex_acum_fig = acum_plot(jhu_conf_mex_df["fecha_confirmados_dateTime"], jhu_conf_mex_df["confirmados"],
+            jhu_deaths_mex_df["fecha_muerte_dateTime"], jhu_deaths_mex_df["muertes"], region="México")
+
+#Getting daily cases ...
+jhu_conf_daily = diff(jhu_conf_mex_df["confirmados"])
+jhu_conf_mex_df["casos diarios"] = jhu_conf_daily
+
+#Getting daily deaths...
+jhu_daily_deaths = diff(jhu_deaths_mex_df["muertes"])
+jhu_deaths_mex_df["muertes diarias"] = jhu_daily_deaths
+
+daily_cases_mex_fig = show_confirmed_cases(jhu_conf_mex_df["fecha_confirmados_dateTime"],jhu_conf_mex_df["casos diarios"], region = "México", anomalia = True)
+daily_deaths_mex_fig = show_deaths(jhu_deaths_mex_df["fecha_muerte_dateTime"], jhu_deaths_mex_df["muertes diarias"],  region = "México", anomalia = True)
 
 layout1 = html.Div([
     html.Header(
@@ -213,7 +282,7 @@ layout1 = html.Div([
                 [  #Row1
                     html.Div(
                         [  #Column1
-
+                                   
                         ],
                         className="col-2"),
                     html.Div(
@@ -224,7 +293,8 @@ layout1 = html.Div([
                             html.Div(className="w-100"),
                             html.Div([
                                 html.H6("Última fecha de actualización : " + str_last_update)
-                            ],className= "col-12  d-flex  justify-content-center")
+                            ],className= "col-12  d-flex  justify-content-center"),
+                            html.Div(className="w-100")                          
                         ],
                         className="col-8"),
                     html.Div(
@@ -234,30 +304,71 @@ layout1 = html.Div([
                         className="col-2")
                 ],
                 className="row"),
+
+
+
             html.Div(
                 [  #Row2
                     html.Div(
                         [  #Column1
-                           "1"
+                           #Bootstrap Card ..................
+                            html.Div([
+                                html.Div("Confirmados acumulados", className="card-header d-flex justify-content-center"),
+                                html.Div([
+                                    html.H5("1,256,525", className="card-title"),],
+                                        className="card-body d-flex justify-content-center")],
+                                    className="card border-danger mb-3", style={"width": 270}),     
+                        ],
+                        className="col d-flex justify-content-center"),
+                    html.Div(
+                        [  #Column2
+                            html.Div([
+                                html.Div("Defunciones acumuladas", className="card-header d-flex justify-content-center"),
+                                html.Div([
+                                    html.H5("1,256,525", className="card-title"),],
+                                        className="card-body d-flex justify-content-center")],
+                                    className="card border-dark mb-3", style={"width": 270}),
+                        ],
+                        className="col d-flex justify-content-center"),
+                    html.Div(
+                        [  #Column3
+                            html.Div([
+                                html.Div("Recuperados acumulados", className="card-header d-flex  justify-content-center"),
+                                html.Div([
+                                    html.H5("1,256,525", className="card-title"),],
+                                        className="card-body d-flex  justify-content-center")],
+                                    className="card border-success mb-3", style={"width": 270}),
+                        ],
+                        className="col d-flex justify-content-center")
+                ],
+                className="row"),
+
+
+
+            html.Div(
+                [  #Row3
+                    html.Div(
+                        [  #Column1
+                           
                         ],
                         className="col-2"),
                     html.Div(
                         [  #Column2
-                            html.Div(
-                                html.P('''Las siguiente gráfica muestra los nuevos casos diarios confirmados de COVID-19
-                                        en México registrados con la fecha de ingreso, la cual de acuerdo con la Secretaria de Salud identifica la fecha de ingreso
-                                        del placiente a una unidad de atención. Por otro lado, los decesos fueron registrados con la fecha de defunción, la 
-                                        cuál identifica la fecha en que el paciente falleció.'''),className = "d-flex  justify-content-center" ),
                             html.Div(className="w-100"),
                             html.Div([
-                                dcc.Graph(id = "national_cases", figure = national_conf_cases_fig)
+                                dcc.Graph(id = "national_cases", figure = daily_cases_mex_fig)
                             ], className="d-flex  justify-content-center"),
                             html.Div(className="w-100"),
                             html.Div([
-                                dcc.Graph(id = "national_deaths", figure = national_deaths_fig)
+                                dcc.Graph(id = "national_deaths", figure = daily_deaths_mex_fig)
                             ], className="d-flex  justify-content-center"),
+                            html.Div( [
+                                dcc.Markdown('''
+                                _*El día **5 de octubre del 2020 los datos reportados presentan anomalías**. Dichas anomalías fueron excluidas del cálculo del promedio de 7 días._
+                                ''')
+                            ]),
                             html.Div([
-                                dcc.Graph(id = "national_acum", figure = acum_fig)
+                                dcc.Graph(id = "national_acum", figure = jhu_mex_acum_fig)
                             ], className="d-flex  justify-content-center"),
                             html.H4("Situación actual de la pandemia por entidad"),
                             html.Div(
@@ -283,28 +394,13 @@ layout1 = html.Div([
                         className="col-8"),
                     html.Div(
                         [  #Column3
-                            "3"
+                            
                         ],
                         className="col-2")
                 ],
                 className="row"),
         ],
         className="container"),
-
-    #Bootstrap Card ..................
-    html.Div([
-        html.Div("Header", className="card-header"),
-        html.Div([
-            html.H5("Card title", className="card-title"),
-            html.
-            P("Some quick example text to build on the card title and make up the bulk of the card's content.",
-              className="card-text"),
-            html.A("Go somewhere", className="btn btn-primary", href="#")
-        ],
-                 className="card-body")
-    ],
-             className="card border-danger mb-3",
-             style={"width": 288}),
     dcc.Link('Go to App 2', href='/apps/app2')
 ])
 
