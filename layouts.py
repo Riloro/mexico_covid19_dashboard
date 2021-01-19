@@ -74,6 +74,10 @@ pio.templates.default = "plotly_white"
 #Reading data by state ....
 datos_por_estado = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/poblaciones_casos_por_estado.csv",
                                  encoding="latin1")
+                                 
+#List of states
+lista_estados = list(datos_por_estado["ENTIDAD"]) # Estados ordenados por clave de entidad federativa
+
 # Rate of confirmed case by 100,000 people
 datos_por_estado["TASA DE CASOS POR 100K"] = 100000 * datos_por_estado["Casos confirmados"]/datos_por_estado["POBLACION"]
 datos_por_estado.sort_values("TASA DE CASOS POR 100K", ascending = False, inplace = True)
@@ -243,9 +247,6 @@ str_conf_mex_commas = insert_commas(str_conf_mex)
 str_recovered_mex_commas = insert_commas(str_recovered_mex)
 str_deaths_mex_commas = insert_commas(str_deaths_mex)
 
-#List of states
-lista_estados = list(poblacion_tot_estado["ENTIDAD"])[1:] # Estados ordenados por clave de entidad federativa
-
 layout1 = html.Div([
     html.Header(
         html.Nav(html.A([
@@ -402,7 +403,7 @@ layout1 = html.Div([
                                     options=[
                                                 {'label': v , 'value': i } for i,v in enumerate(lista_estados)
                                             ],
-                                    value = 15
+                                    value = 0
                                         )),
                             html.Div(
                                 html.P(id = "p_test")
@@ -425,11 +426,10 @@ layout1 = html.Div([
                 ],
                 className="row"),
         ],
-        className="container"),
-    dcc.Link('Go to App 2', href='/apps/app2')
+        className="container")
 ])
 
-layout2 = html.Div([])
+layout2 = html.Div(["HOLI"])
 
 #CallBack dropDown function ...
 @app.callback(Output('conf_cases_edo', 'figure'),
