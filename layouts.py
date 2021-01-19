@@ -249,16 +249,17 @@ str_deaths_mex_commas = insert_commas(str_deaths_mex)
 
 layout1 = html.Div([
     html.Header(
-        html.Nav(html.A([
-            html.Img(src=logo_url,
-                     width="35",
-                     height="35",
-                     className="d-inline-block align-top",
-                     alt=""), "Monitoreo COVID-19 "
-        ],
-                        className="navbar-brand"),
-                 className="navbar navbar-expand-sm navbar-dark bg-dark",
-                 style=dict(backgroundColor="#cfd8dc"))),
+        html.Nav(
+            html.Div(
+                    html.A([
+                            html.Img(src=logo_url,
+                                    width="35",
+                                    height="35",
+                                    className="d-inline-block align-top",
+                                    alt=""), "Monitoreo COVID-19 "
+                                                                        ], className="navbar-brand"), 
+                                                                            className = "container-fluid"),
+                 className="navbar navbar-expand-sm navbar-dark bg-dark",style=dict(backgroundColor="#cfd8dc"))),
     #Building a Bootstrap grid system .....
     html.Div(
         [  #Container
@@ -391,8 +392,10 @@ layout1 = html.Div([
                                               figure=jhu_mex_acum_fig)
                                 ],
                                 className="d-flex  justify-content-center"),
-                            html.H4(
-                                "Situación actual de la pandemia por entidad"),
+                            html.Div(
+                                html.H4(
+                                    "Situación actual de la pandemia por entidad federativa"),
+                                className = 'p-3'),
                             html.Div(
                                 dcc.Graph(id="rate_per_100k",
                                           figure=fig_bar_cases_rate),
