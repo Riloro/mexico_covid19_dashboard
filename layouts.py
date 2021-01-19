@@ -42,15 +42,16 @@ jhu_recovered_mex_df["recuperados"] = raw_recovered_data[0].iloc[4:].reset_index
 jhu_recovered_mex_df["feha_recuperados_dateTime"] = pd.to_datetime(jhu_recovered_mex_df["fecha_recuperado"], format = "%m/%d/%y")
 
 #Reading national Data ...........................................................................................................................................
-data = pd.read_csv("http://datosabiertos.salud.gob.mx/gobmx/salud/datos_abiertos/datos_abiertos_covid19.zip", compression = "zip", encoding = "latin1")
-print("ARCHIVOS DE SALUD CARGADOS :)")
+#data = pd.read_csv("http://datosabiertos.salud.gob.mx/gobmx/salud/datos_abiertos/datos_abiertos_covid19.zip", compression = "zip", encoding = "latin1")
+#print("ARCHIVOS DE SALUD CARGADOS :)")
 # States diccionary ...
-dics = pd.read_excel("https://github.com/Riloro/mexico_covid19_dashboard/blob/master/diccionarios/201128%20Catalogos_.xlsx?raw=true", sheet_name = None)
-dic_estados = dics["Catálogo de ENTIDADES"]
-#States population
-poblaciones = pd.read_csv("http://www.conapo.gob.mx/work/models/CONAPO/Datos_Abiertos/Proyecciones2018/pob_mit_proyecciones.csv", encoding="latin1")
-poblacion_2020 = poblaciones[poblaciones["AÑO"] == 2020]
-print("DATOS DE CONAPO CARGADOS :)")
+# dics = pd.read_excel("https://github.com/Riloro/mexico_covid19_dashboard/blob/master/diccionarios/201128%20Catalogos_.xlsx?raw=true", sheet_name = None)
+# dic_estados = dics["Catálogo de ENTIDADES"]
+# #States population
+# poblaciones = pd.read_csv("http://www.conapo.gob.mx/work/models/CONAPO/Datos_Abiertos/Proyecciones2018/pob_mit_proyecciones.csv", encoding="latin1")
+# poblacion_2020 = poblaciones[poblaciones["AÑO"] == 2020]
+# print("DATOS DE CONAPO CARGADOS :)")
+
 #Last file update ..............................................................
 date_last_update = jhu_conf_mex_df["fecha_confirmados_dateTime"].iloc[-1]
 # last_update = data["FECHA_ACTUALIZACION"].iloc[0]
@@ -70,38 +71,9 @@ str_last_update = day + "/" + month + "/" + str(date_last_update.year)
 
 # Default template for all figures ...
 pio.templates.default = "plotly_white"
-#Filtering a DataFrame for negative cases ... Casos negativos ---> 7
-condicion_negativos = data["CLASIFICACION_FINAL"] == 7
-negativos = data[condicion_negativos]
-#Filtering dataFrame for positive cases ... 1,2,3 CASOS CONFIRMADOS
-confirmados = data[data["CLASIFICACION_FINAL"].isin([1, 2, 3])]
-#Casos sospechosos 6 --> sospechosos sin muestra", "sospechosos con posibilidad de resultado" y "sospechosos sin posibilidad de resultado".
-sospechosos = data[data["CLASIFICACION_FINAL"] == 6]
-sospechosos_sin_muestra = data[(data["CLASIFICACION_FINAL"] == 6) & (data["RESULTADO_LAB"] == 97)]
-sospechosos_con_posibilidad =data[(data["CLASIFICACION_FINAL"]==6)&(data["RESULTADO_LAB"]==3)]
-sospechosos_sin_posibilidad=data[(data["CLASIFICACION_FINAL"].isin([6,5,4]))&(data["RESULTADO_LAB"].isin([4]))]
-#Filtering deaths ...
-defunciones = confirmados[confirmados["FECHA_DEF"] != "9999-99-99"]
-
-#Grouping by "Fecha_Ingreso"
-grupos = confirmados.groupby("FECHA_INGRESO")
-confirmados_por_fecha = grupos.size().to_frame("confirmados").reset_index()   #grupos.size() is a serie
-confirmados_por_fecha["fecha_ingreso"] = pd.to_datetime(confirmados_por_fecha["FECHA_INGRESO"], format = "%Y-%m-%d") # To date data type
-#Gruoping deaths by "Fecha_DEF"
-defunciones_por_fecha = defunciones.groupby("FECHA_DEF").size().to_frame("defunciones").reset_index()
-defunciones_por_fecha["fecha_defuncion"] = pd.to_datetime(defunciones_por_fecha["FECHA_DEF"], format = "%Y-%m-%d")
-# .....
-sospechosos_por_fecha = sospechosos.groupby("FECHA_SINTOMAS").size().to_frame("sospechosos").reset_index()
-sospechosos_por_fecha["fecha_sintomas"] = pd.to_datetime(sospechosos_por_fecha["FECHA_SINTOMAS"], format = "%Y-%m-%d")
-
-#Grouping by state ENTIDAD_RES
-confirmados_por_estado = confirmados.groupby("ENTIDAD_RES").size().to_frame("Casos confirmados").reset_index()
-confirmados_por_entidad = pd.merge(confirmados_por_estado, dic_estados, how = "left", left_on = "ENTIDAD_RES", right_on = "CLAVE_ENTIDAD" ) # left outer join
-
-grupos_pob = poblacion_2020.groupby(["CVE_GEO","ENTIDAD"])
-poblacion_tot_estado = grupos_pob["POBLACION"].sum().to_frame("POBLACION").reset_index()   # Sum operation in the POBLACION column of each group
-
-datos_por_estado = pd.merge(confirmados_por_entidad, poblacion_tot_estado, how = "left", left_on = "CLAVE_ENTIDAD", right_on = "CVE_GEO" )
+#Reading data by state ....
+datos_por_estado = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/poblaciones_casos_por_estado.csv",
+                                 encoding="latin1")
 # Rate of confirmed case by 100,000 people
 datos_por_estado["TASA DE CASOS POR 100K"] = 100000 * datos_por_estado["Casos confirmados"]/datos_por_estado["POBLACION"]
 datos_por_estado.sort_values("TASA DE CASOS POR 100K", ascending = False, inplace = True)
@@ -113,9 +85,12 @@ fig_bar_cases_rate = px.bar(x = datos_por_estado["ENTIDAD"], y = datos_por_estad
 fig_bar_cases_rate.update_traces(marker = dict(color = "#ff616f"))
 
 # Groping by state ENTIDAD_RES and FECHA_INGRESO
-confirmados_por_estado_fecha = confirmados.groupby(["ENTIDAD_RES","FECHA_INGRESO"]).size().to_frame("confirmados").reset_index()
+confirmados_por_estado_fecha = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/confirmados_por_estado.csv", 
+                                            encoding="latin1")
 confirmados_por_estado_fecha["fecha_ingreso"] = pd.to_datetime(confirmados_por_estado_fecha["FECHA_INGRESO"], format = "%Y-%m-%d")
-defunciones_por_estado_fecha = defunciones.groupby(["ENTIDAD_RES", "FECHA_DEF"]).size().to_frame("defunciones").reset_index()
+
+defunciones_por_estado_fecha = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/defunciones_por_estado.csv", 
+                                            encoding="latin1")
 defunciones_por_estado_fecha["fecha_defuncion"] = pd.to_datetime(defunciones_por_estado_fecha["FECHA_DEF"], format = "%Y-%m-%d")
 
 entidad_clave = datos_por_estado["ENTIDAD"].to_frame()
@@ -168,16 +143,6 @@ def acum_plot(x_conf_data, y_conf_data, x_def_data, y_def_data, region ):
     fig_acum.update_yaxes(title = "Número de casos acumulados")
     fig_acum.update_layout(title = "Casos acumulados en " + region , hovermode = "x unified")
     return fig_acum
-# Deaths and confirmed cases by state .............................................................
-# clave_estado = 16
-# confirmados_estado = confirmados_por_estado_fecha_clave[confirmados_por_estado_fecha_clave["ENTIDAD_RES"] == clave_estado]
-# print("Total de casos confirmados = ",confirmados_estado["confirmados"].sum())
-# confirmados_estado.reset_index(drop = True, inplace = True)
-# confirmados_estado["confirmados_acumulados"] = commulative_cases(confirmados_estado["confirmados"]) # Accumulated confirmed cases in Mich.
-# defunciones_estado = defunciones_por_estado_fecha_clave[defunciones_por_estado_fecha_clave["ENTIDAD_RES"] == clave_estado ]
-# print("Total de defunciones acumuladas = ", defunciones_estado["defunciones"].sum())
-# defunciones_estado.reset_index(drop = True, inplace = True)
-# defunciones_estado["defunciones_acumuladas"] = commulative_cases(defunciones_estado["defunciones"])
 
 #Computing the average with the actual day plus the 6 previous days
 def average_of_seven_days(serie , threshold = 25000):
@@ -252,18 +217,6 @@ def diff(data):
     res = np.insert(v_2,0,v_1[0])
 
     return pd.Series(res)
-
-
-# Commulative confirmed cases ....
-#confirmados_por_fecha["casos_acumulados"] = commulative_cases(confirmados_por_fecha["confirmados"])
-# Commulative Deaths  ....
-#defunciones_por_fecha["defunciones_acumuladas"] = commulative_cases(defunciones_por_fecha["defunciones"])
-#National deaths and cases figures ...
-#national_conf_cases_fig = show_confirmed_cases(confirmados_por_fecha, "México")
-#national_deaths_fig = show_deaths(defunciones_por_fecha, "México")
-#More figures ...
-# acum_fig = acum_plot(confirmados_por_fecha["fecha_ingreso"],confirmados_por_fecha["casos_acumulados"],
-#             defunciones_por_fecha["fecha_defuncion"], defunciones_por_fecha["defunciones_acumuladas"], region = "México" )
 
 #JHU data figures .....................................................................................................................
 #Graficando los casos confirmados de muertes y confirmados ....
