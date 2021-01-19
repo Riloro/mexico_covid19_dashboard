@@ -257,7 +257,7 @@ layout1 = html.Div([
                      alt=""), "Monitoreo COVID-19 "
         ],
                         className="navbar-brand"),
-                 className="navbar navbar-dark bg-dark",
+                 className="navbar navbar-expand-sm navbar-dark bg-dark",
                  style=dict(backgroundColor="#cfd8dc"))),
     #Building a Bootstrap grid system .....
     html.Div(
@@ -271,7 +271,7 @@ layout1 = html.Div([
                     html.Div(
                         [  #Column2
                             html.Div(
-                                html.H1("Visualizando la pandemia por COVID-19"
+                                html.H1(["Visualizando la pandemia por COVID-19"]
                                         ),
                                 className="d-flex  justify-content-center"),
                             html.Div(
