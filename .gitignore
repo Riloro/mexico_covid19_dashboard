@@ -2,3 +2,5 @@ covid19_env/
 __pycache__/
 .vscode/
 diccionarios/
+*.pyc
+.DS_Store
