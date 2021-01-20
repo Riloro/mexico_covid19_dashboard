@@ -74,7 +74,7 @@ pio.templates.default = "plotly_white"
 #Reading data by state ....
 datos_por_estado = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/poblaciones_casos_por_estado.csv",
                                  encoding="latin1")
-                                 
+
 #List of states
 lista_estados = list(datos_por_estado["ENTIDAD"]) # Estados ordenados por clave de entidad federativa
 
@@ -89,11 +89,11 @@ fig_bar_cases_rate = px.bar(x = datos_por_estado["ENTIDAD"], y = datos_por_estad
 fig_bar_cases_rate.update_traces(marker = dict(color = "#ff616f"))
 
 # Groping by state ENTIDAD_RES and FECHA_INGRESO
-confirmados_por_estado_fecha = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/confirmados_por_estado.csv", 
+confirmados_por_estado_fecha = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/confirmados_por_estado.csv",
                                             encoding="latin1")
 confirmados_por_estado_fecha["fecha_ingreso"] = pd.to_datetime(confirmados_por_estado_fecha["FECHA_INGRESO"], format = "%Y-%m-%d")
 
-defunciones_por_estado_fecha = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/defunciones_por_estado.csv", 
+defunciones_por_estado_fecha = pd.read_csv("https://raw.githubusercontent.com/Riloro/mexico_covid19_dashboard/master/processed_data/defunciones_por_estado.csv",
                                             encoding="latin1")
 defunciones_por_estado_fecha["fecha_defuncion"] = pd.to_datetime(defunciones_por_estado_fecha["FECHA_DEF"], format = "%Y-%m-%d")
 
@@ -249,17 +249,17 @@ str_deaths_mex_commas = insert_commas(str_deaths_mex)
 
 layout1 = html.Div([
     html.Header(
-        html.Nav(
-            html.Div(
-                    html.A([
-                            html.Img(src=logo_url,
-                                    width="35",
-                                    height="35",
-                                    className="d-inline-block align-top",
-                                    alt=""), "Monitoreo COVID-19 "
-                                                                        ], className="navbar-brand"), 
-                                                                            className = "container-fluid"),
-                 className="navbar navbar-expand-sm navbar-dark bg-dark",style=dict(backgroundColor="#cfd8dc"))),
+        html.Nav(html.Div(html.A([
+            html.Img(src=logo_url,
+                     width="35",
+                     height="35",
+                     className="d-inline-block align-top",
+                     alt=""), "Monitoreo COVID-19 "
+        ],
+                                 className="navbar-brand"),
+                          className="container-fluid"),
+                 className="navbar navbar-expand-sm navbar-dark bg-dark",
+                 style=dict(backgroundColor="#cfd8dc"))),
     #Building a Bootstrap grid system .....
     html.Div(
         [  #Container
@@ -271,10 +271,10 @@ layout1 = html.Div([
                         className="col-2"),
                     html.Div(
                         [  #Column2
-                            html.Div(
-                                html.H1(["Visualizando la pandemia por COVID-19"]
-                                        ),
-                                className="d-flex  justify-content-center"),
+                            html.Div(html.H1(
+                                ["Visualizando la pandemia por COVID-19"]),
+                                     className="d-flex  justify-content-center"
+                                     ),
                             html.Div(
                                 html.H1("en México"),
                                 className="d-flex  justify-content-center"),
@@ -392,25 +392,23 @@ layout1 = html.Div([
                                               figure=jhu_mex_acum_fig)
                                 ],
                                 className="d-flex  justify-content-center"),
-                            html.Div(
-                                html.H4(
-                                    "Situación actual de la pandemia por entidad federativa"),
-                                className = 'p-3'),
+                            html.Div(html.H4(
+                                "Situación actual de la pandemia por entidad federativa"
+                            ),
+                                     className='p-3'),
                             html.Div(
                                 dcc.Graph(id="rate_per_100k",
                                           figure=fig_bar_cases_rate),
                                 className="d-flex  justify-content-center"),
                             html.Div(
-                                dcc.Dropdown(
-                                    id='state_selector',
-                                    options=[
-                                                {'label': v , 'value': i } for i,v in enumerate(lista_estados)
-                                            ],
-                                    value = 0
-                                        )),
-                            html.Div(
-                                html.P(id = "p_test")
-                            ),
+                                dcc.Dropdown(id='state_selector',
+                                             options=[{
+                                                 'label': v,
+                                                 'value': i
+                                             } for i, v in enumerate(
+                                                 lista_estados)],
+                                             value=0)),
+                            html.Div(html.P(id="p_test")),
                             html.Div(
                                 dcc.Graph(id="conf_cases_edo"),
                                 className="d-flex  justify-content-center"),
