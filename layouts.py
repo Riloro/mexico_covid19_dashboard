@@ -453,8 +453,8 @@ layout1 = html.Div([
                     html.H5("Monitoreo COVID-19"),
                     dcc.Markdown(
                         '''
-                                        Este artículo no busca interpretar las cifras de manera epidemiológica, simplemente estamos mostrando día a día el número de 
-                                        casos y su tendendencia. Para más información sobre el COVID-19 por favor visita: https://coronavirus.gob.mx/
+                                        Este artículo no busca interpretar las cifras de manera epidemiológica, simplemente se está mostrando el número de 
+                                        casos dairio y su tendendencia. Para más información sobre el COVID-19 por favor visita: https://coronavirus.gob.mx/
                                         ''', )
                 ],
                          className="col-lg-6 col-md-12 mb-4 mb-md-0"),
