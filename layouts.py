@@ -433,7 +433,7 @@ layout1 = html.Div([
                                 bases de datos son actualizadas diariamente y sus enlaces se encuentran al pie de la página.
 
                                 Es importante mencionar que las cifras mostradas en este dashboard pueden diferir de otras fuentes, ya que dichas fuentes pueden tener
-                                distintos horarios de actualización o distintos métodos de recolección de datos. 
+                                distintos horarios de actualización o distintos métodos para la recolección de datos. 
 
                                 '''),
                         ],
