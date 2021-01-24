@@ -468,7 +468,7 @@ layout1 = html.Div([
                               className="text-dark")),
                         html.Li(
                             html.
-                            A("Datos abiertos de la Secretaría de salud",
+                            A("Datos abiertos de la Secretaría de Salud",
                               href=
                               "https://www.gob.mx/salud/documentos/datos-abiertos-152127",
                               className="text-dark")),
