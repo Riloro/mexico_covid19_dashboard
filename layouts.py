@@ -2,6 +2,8 @@ from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 import os
+from dash_html_components.Li import Li
+from dash_html_components.Ul import Ul
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
@@ -268,30 +270,28 @@ layout1 = html.Div([
                     html.Div(
                         [  #Column1
                         ],
-                        className="col-2"),
+                        className="col"),
                     html.Div(
                         [  #Column2
                             html.Div(html.H1(
-                                ["Visualizando la pandemia por COVID-19"]),
+                                ["Visualizando la pandemia por COVID-19 en México"]),
                                      className="d-flex  justify-content-center"
                                      ),
-                            html.Div(
-                                html.H1("en México"),
-                                className="d-flex  justify-content-center"),
+                            # html.Div(
+                            #     html.H1("en México"),
+                            #     className="d-flex  justify-content-center"),
                             html.Div(className="w-100"),
                             html.Div([
                                 html.H6("Última fecha de actualización : " +
                                         str_last_update)
-                            ],
-                                     className=
-                                     "col-12  d-flex  justify-content-center"),
+                            ],className="col-12 p-4 d-flex  justify-content-center"),
                             html.Div(className="w-100")
                         ],
-                        className="col-8 p-5"),
+                        className="col-10 p-5"),
                     html.Div(
                         [  #Column3                        
                         ],
-                        className="col-2")
+                        className="col")
                 ],
                 className="row"),
             html.Div(
@@ -383,6 +383,14 @@ layout1 = html.Div([
                                 className="d-flex  justify-content-center"),
                             html.Div([
                                 dcc.Markdown('''
+                                    El promedio de 7 días es calculado tomando en cuenta el día "actual" y los seis anteriores. Esta curva del promedio de 7 días ayuda a visualizar 
+                                    la tendencia de los casos reportados diariamente. De acuendo con la Escuela de Medicina de la Universidad Johns Hopkins, "aplanar la curva" involucra una reducción
+                                    de casos de COVID-19 de una día para el otro. Esto ayuda a prevenir una saturación de los centros de salud. Entonces, cuando un país tiene una menor cantidad 
+                                    de casos confirmados que los reportados el día anterior, es una señal de que el país esta aplanado la curva. 
+                                ''')
+                            ]),
+                            html.Div([
+                                dcc.Markdown('''
                                 _*El día **5 de octubre del 2020 los datos reportados presentan anomalías**. Dichas anomalías fueron excluidas del cálculo del promedio de 7 días._
                                 ''')
                             ]),
@@ -417,7 +425,17 @@ layout1 = html.Div([
                                 className="d-flex  justify-content-center"),
                             html.Div(
                                 dcc.Graph(id="cum_edo"),
-                                className="d-flex  justify-content-center")
+                                className="d-flex  justify-content-center"),
+                            html.Div(html.H4("Información sobre los datos")),
+                            dcc.Markdown('''
+                                Los datos para mostrar la situación nacional son obtenidos del repositorio de la Universidad Johns Hopkins. Además, para
+                                mostrar los casos por entidad federativa, se utilizaron los _datos abiertos_ proporcionados por la Secretaría de Salud. Ambas 
+                                bases de datos son actualizadas diariamente y sus enlaces se encuentran al pie de la página.
+
+                                Es importante mencionar que las cifras mostradas en este dashboard pueden diferir de otras fuentes, ya que dichas fuentes pueden tener
+                                distintos horarios de actualización o distintos métodos de recolección de datos. 
+
+                                '''),
                         ],
                         className="col-8"),
                     html.Div(
@@ -427,7 +445,68 @@ layout1 = html.Div([
                 ],
                 className="row"),
         ],
-        className="container")
+        className="container"),
+    html.Footer([
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H5("Monitoreo COVID-19"),
+                    dcc.Markdown(
+                        '''
+                                        Este artículo no busca interpretar las cifras de manera epidemiológica, simplemente estamos mostrando día a día el número de 
+                                        casos y su tendendencia. Para más información sobre el COVID-19 por favor visita: https://coronavirus.gob.mx/
+                                        ''', )
+                ],
+                         className="col-lg-6 col-md-12 mb-4 mb-md-0"),
+                html.Div([
+                    html.H5("Bases de datos utilizadas"),
+                    html.Ul([
+                        html.Li(
+                            html.
+                            A("Repositorio de  Johns Hopkins University",
+                              href="https://github.com/CSSEGISandData/COVID-19",
+                              className="text-dark")),
+                        html.Li(
+                            html.
+                            A("Datos abiertos de la Secretaría de salud",
+                              href=
+                              "https://www.gob.mx/salud/documentos/datos-abiertos-152127",
+                              className="text-dark")),
+                        html.Li(
+                            html.
+                            A("Proyecciones de la población 2020 CONAPO",
+                              href=
+                              "https://www.gob.mx/conapo/documentos/proyecciones-de-la-poblacion-de-los-municipios-de-mexico-2015-2030",
+                              className="text-dark"))
+                    ],
+                            className="list-unstyled mb-0")
+                ],
+                         className="col-lg-3 col-md-6 mb-4 mb-md-0"),
+                html.Div([
+                    html.Li(
+                        html.
+                        A("GitHub",
+                          href=
+                          "https://github.com/Riloro/mexico_covid19_dashboard",
+                          className="text-dark"))
+                ],
+                         className=
+                         "col-lg-3 col-md-6 mb-4 mb-md-0 d-flex  justify-content-center"
+                         )
+            ],
+                     className="row")
+        ],
+                 className="container p-4"),
+        html.Div([
+            "Desarrollado por ",
+            html.A("Riloro",
+                   href="https://github.com/Riloro",
+                   className="text-dark")
+        ],
+                 className="text-center p-3",
+                 style=dict(backgroundColor="#cfd8dc"))
+    ],
+                className="bg-light text-center text-lg-start ")
 ])
 
 layout2 = html.Div(["HOLI"])
