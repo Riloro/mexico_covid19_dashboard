@@ -12,9 +12,9 @@ import numpy as np
 from datetime import datetime
 from app import app
 
-logo_url = "https://firebasestorage.googleapis.com/v0/b/imhere-e8e31.appspot.com/o/images%2Fvirus.png?alt=media&token=181e8b57-30b3-424f-a1ef-3890143e709c"
+#logo_url = "https://firebasestorage.googleapis.com/v0/b/imhere-e8e31.appspot.com/o/images%2Fvirus.png?alt=media&token=181e8b57-30b3-424f-a1ef-3890143e709c"
 
-
+logo_url = "https://firebasestorage.googleapis.com/v0/b/imhere-e8e31.appspot.com/o/images%2Fcirclesbkw.png?alt=media&token=945aa6a5-938b-4b6a-9895-a900eec394a0"
 #Readin JHU data ................................................................................................................................................
 #Casos confirmados reportados por JHU ....
 jhu_confirmed_time_serie = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", encoding = "utf-8")
