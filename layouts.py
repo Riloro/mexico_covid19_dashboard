@@ -25,7 +25,6 @@ jhu_deaths_mexico = jhu_deaths_time_serie[jhu_deaths_time_serie["Country/Region"
 #Recuperados reportados por JHU ...
 jhu_recovered_time_serie = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv",encoding="utf-8")
 jhu_recovered_mexico = jhu_recovered_time_serie[jhu_recovered_time_serie["Country/Region"] == "Mexico"]
-
 raw_confirmed_data = jhu_confirmed_mexico.reset_index(drop=True).transpose().reset_index()
 raw_deats_data = jhu_deaths_mexico.reset_index(drop = True).transpose().reset_index()
 raw_recovered_data = jhu_recovered_mexico.reset_index(drop = True).transpose().reset_index()
@@ -244,6 +243,8 @@ daily_deaths_mex_fig = show_deaths(jhu_deaths_mex_df["fecha_muerte_dateTime"], j
 str_conf_mex = str(jhu_conf_mex_df["confirmados"].iloc[-1])
 str_deaths_mex = str(jhu_deaths_mex_df["muertes"].iloc[-1])
 str_recovered_mex = str(jhu_recovered_mex_df["recuperados"].iloc[-1])
+
+
 #Calling inset_commas function ...
 str_conf_mex_commas = insert_commas(str_conf_mex)
 str_recovered_mex_commas = insert_commas(str_recovered_mex)
@@ -319,6 +320,26 @@ layout1 = html.Div([
                         className="col d-flex justify-content-center"),
                     html.Div(
                         [  #Column2
+                            # html.Div([
+                            #     html.Div(
+                            #         "Defunciones acumuladas",
+                            #         className=
+                            #         "card-header d-flex justify-content-center"
+                            #     ),
+                            #     html.Div(
+                            #         [
+                            #             html.H5(str_deaths_mex_commas,
+                            #                     className="card-title"),
+                            #         ],
+                            #         className=
+                            #         "card-body d-flex justify-content-center")
+                            # ],
+                            #          className="card border-dark mb-3",
+                            #          style={"width": 270}),
+                        ],
+                        className="col d-flex justify-content-center"),
+                    html.Div(
+                        [  #Column3
                             html.Div([
                                 html.Div(
                                     "Defunciones acumuladas",
@@ -334,27 +355,25 @@ layout1 = html.Div([
                                     "card-body d-flex justify-content-center")
                             ],
                                      className="card border-dark mb-3",
-                                     style={"width": 270}),
-                        ],
-                        className="col d-flex justify-content-center"),
-                    html.Div(
-                        [  #Column3
-                            html.Div([
-                                html.Div(
-                                    "Recuperados acumulados",
-                                    className=
-                                    "card-header d-flex  justify-content-center"
-                                ),
-                                html.Div(
-                                    [
-                                        html.H5(str_recovered_mex_commas,
-                                                className="card-title"),
-                                    ],
-                                    className=
-                                    "card-body d-flex  justify-content-center")
-                            ],
-                                     className="card border-success mb-3",
-                                     style={"width": 270}),
+                                     style={"width": 270})
+
+
+                            # html.Div([
+                            #     html.Div(
+                            #         "Recuperados acumulados",
+                            #         className=
+                            #         "card-header d-flex  justify-content-center"
+                            #     ),
+                            #     html.Div(
+                            #         [
+                            #             html.H5(str_recovered_mex_commas,
+                            #                     className="card-title"),
+                            #         ],
+                            #         className=
+                            #         "card-body d-flex  justify-content-center")
+                            # ],
+                            #          className="card border-success mb-3",
+                            #          style={"width": 270}),
                         ],
                         className="col d-flex justify-content-center")
                 ],
